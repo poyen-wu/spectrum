@@ -181,14 +181,30 @@ function getRoomViewForSocket(room, socketId) {
   const round = g.rounds[g.roundIndex];
   const oppId = getOpponentId(room, socketId);
 
+  // Determine which spectrum to show based on phase
+  let left, right;
+  if (g.phase === "prompt") {
+    // Show current player's spectrum when they write their clue
+    const myQuestion = round.playerQuestions[socketId];
+    left = myQuestion.left;
+    right = myQuestion.right;
+  } else if (g.phase === "guess" || g.phase === "reveal") {
+    // Show opponent's spectrum when guessing or revealing
+    if (oppId) {
+      const oppQuestion = round.playerQuestions[oppId];
+      left = oppQuestion.left;
+      right = oppQuestion.right;
+    }
+  }
+
   const view = {
     ...base,
     game: {
       roundIndex: g.roundIndex,
       totalRounds: g.rounds.length,
       phase: g.phase, // prompt | guess | reveal
-      left: round.left,
-      right: round.right,
+      left,
+      right,
       timerRemaining: g.timerRemaining,
       you: {
         target: g.phase === "prompt" ? round.targets[socketId] : undefined,
@@ -219,11 +235,15 @@ function getRoomViewForSocket(room, socketId) {
       oppPointsThisRound: oppPoints,
       yourGuessAgainstOppTarget: {
         guess: round.guesses[socketId],
-        target: round.targets[oppId]
+        target: round.targets[oppId],
+        left: round.playerQuestions[oppId].left,
+        right: round.playerQuestions[oppId].right
       },
       oppGuessAgainstYourTarget: {
         guess: round.guesses[oppId],
-        target: round.targets[socketId]
+        target: round.targets[socketId],
+        left: round.playerQuestions[socketId].left,
+        right: round.playerQuestions[socketId].right
       }
     };
   }
@@ -351,33 +371,44 @@ function createNewGame(room) {
   // reset scores
   for (const pid of Object.keys(room.players)) room.players[pid].score = 0;
 
-  // Shuffle questions to ensure no repeats within a game
-  const availableQuestions = [...globalQuestions];
-  // Fisher-Yates shuffle
-  for (let i = availableQuestions.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [availableQuestions[i], availableQuestions[j]] = [availableQuestions[j], availableQuestions[i]];
+  // Create separate shuffled questions for each player
+  const playerIds = Object.keys(room.players);
+  const playerQuestions = {};
+  
+  for (const pid of playerIds) {
+    // Shuffle questions for this player to ensure no repeats within a game
+    const availableQuestions = [...globalQuestions];
+    // Fisher-Yates shuffle
+    for (let i = availableQuestions.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [availableQuestions[i], availableQuestions[j]] = [availableQuestions[j], availableQuestions[i]];
+    }
+    playerQuestions[pid] = availableQuestions;
   }
 
-  // If more rounds than questions, cycle through the shuffled list
+  // Create rounds with per-player questions
   const rounds = Array.from({ length: room.settings.rounds }, (_, i) => {
-    const spec = availableQuestions[i % availableQuestions.length];
-    return {
-      left: spec.left,
-      right: spec.right,
+    const round = {
+      playerQuestions: {},
       targets: {},
       prompts: {},
       guesses: {},
       points: {}
     };
-  });
-
-  const playerIds = Object.keys(room.players);
-  for (const r of rounds) {
+    
+    // Assign unique question to each player for this round
     for (const pid of playerIds) {
-      r.targets[pid] = Math.floor(Math.random() * 101);
+      const availableQuestions = playerQuestions[pid];
+      const spec = availableQuestions[i % availableQuestions.length];
+      round.playerQuestions[pid] = {
+        left: spec.left,
+        right: spec.right
+      };
+      round.targets[pid] = Math.floor(Math.random() * 101);
     }
-  }
+    
+    return round;
+  });
 
   room.game = {
     rounds,

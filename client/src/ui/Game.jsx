@@ -177,11 +177,14 @@ export default function Game({ roomState, onError }) {
               <Stack spacing={2}>
                 <Box>
                   <Typography variant="subtitle1" sx={{ mb: 1 }}>
-                    Your guess vs their target
+                    Your guess vs {opp?.name || "Opponent"}'s target
+                  </Typography>
+                  <Typography variant="body2" sx={{ mb: 1, opacity: 0.8 }}>
+                    {game.reveal?.yourGuessAgainstOppTarget?.left} — {game.reveal?.yourGuessAgainstOppTarget?.right}
                   </Typography>
                   <SpectrumBar
-                    left={game.left}
-                    right={game.right}
+                    left={game.reveal?.yourGuessAgainstOppTarget?.left}
+                    right={game.reveal?.yourGuessAgainstOppTarget?.right}
                     value={game.reveal?.yourGuessAgainstOppTarget?.guess ?? 50}
                     disabled
                     showTarget
@@ -194,11 +197,14 @@ export default function Game({ roomState, onError }) {
 
                 <Box>
                   <Typography variant="subtitle1" sx={{ mb: 1 }}>
-                    Their guess vs your target
+                    {opp?.name || "Opponent"}'s guess vs your target
+                  </Typography>
+                  <Typography variant="body2" sx={{ mb: 1, opacity: 0.8 }}>
+                    {game.reveal?.oppGuessAgainstYourTarget?.left} — {game.reveal?.oppGuessAgainstYourTarget?.right}
                   </Typography>
                   <SpectrumBar
-                    left={game.left}
-                    right={game.right}
+                    left={game.reveal?.oppGuessAgainstYourTarget?.left}
+                    right={game.reveal?.oppGuessAgainstYourTarget?.right}
                     value={game.reveal?.oppGuessAgainstYourTarget?.guess ?? 50}
                     disabled
                     showTarget
