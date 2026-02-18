@@ -351,8 +351,17 @@ function createNewGame(room) {
   // reset scores
   for (const pid of Object.keys(room.players)) room.players[pid].score = 0;
 
-  const rounds = Array.from({ length: room.settings.rounds }, () => {
-    const spec = pickSpectrumGlobal();
+  // Shuffle questions to ensure no repeats within a game
+  const availableQuestions = [...globalQuestions];
+  // Fisher-Yates shuffle
+  for (let i = availableQuestions.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [availableQuestions[i], availableQuestions[j]] = [availableQuestions[j], availableQuestions[i]];
+  }
+
+  // If more rounds than questions, cycle through the shuffled list
+  const rounds = Array.from({ length: room.settings.rounds }, (_, i) => {
+    const spec = availableQuestions[i % availableQuestions.length];
     return {
       left: spec.left,
       right: spec.right,
