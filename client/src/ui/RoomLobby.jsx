@@ -165,11 +165,11 @@ export default function RoomLobby({ roomState, onError }) {
                   <Button variant="outlined" onClick={backToLobby}>
                     Reset Scores (Back to Lobby)
                   </Button>
-                ) : (
+                ) : status === "lobby" ? (
                   <Button variant="contained" onClick={startGame} disabled={!canStart}>
                     Start Game
                   </Button>
-                )}
+                ) : null}
               </Stack>
             )}
 
