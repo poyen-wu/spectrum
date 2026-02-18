@@ -198,25 +198,6 @@ export default function SpectrumBar({
             pointerEvents: "none"
           }}
         >
-          {pointerLabel && (
-            <Box
-              sx={{
-                position: "absolute",
-                top: 6,
-                left: "50%",
-                transform: "translateX(-50%)",
-                px: 1,
-                py: 0.25,
-                borderRadius: 1,
-                bgcolor: "rgba(0,0,0,0.35)",
-                border: `1px solid ${theme.palette.divider}`
-              }}
-            >
-              <Typography variant="caption" sx={{ lineHeight: 1 }}>
-                {pointerLabel}
-              </Typography>
-            </Box>
-          )}
 
           <Box
             sx={{
@@ -248,24 +229,6 @@ export default function SpectrumBar({
           />
         </Box>
 
-        {/* Value readout */}
-        <Box
-          sx={{
-            position: "absolute",
-            left: "50%",
-            bottom: 6,
-            transform: "translateX(-50%)",
-            px: 1,
-            py: 0.25,
-            borderRadius: 1,
-            bgcolor: "rgba(0,0,0,0.35)",
-            border: `1px solid ${theme.palette.divider}`
-          }}
-        >
-          <Typography variant="caption" sx={{ lineHeight: 1 }}>
-            {safeValue}
-          </Typography>
-        </Box>
       </Box>
 
       {/* Legend */}
